@@ -223,6 +223,9 @@ class Glm4MoeMTP(nn.Module, SupportsPP):
         params_dict = dict(self.named_parameters())
         loaded_params: set[str] = set()
         for name, loaded_weight in weights:
+            if "e_score_correction_bias" in name:
+                loaded_weight = loaded_weight - torch.min(loaded_weight)
+                loaded_weight = loaded_weight.to(self.config.dtype)
             if name == "lm_head.weight":
                 spec_layer = self.model.mtp_start_layer_idx
                 name = f"model.layers.{spec_layer}.shared_head.head.weight"
