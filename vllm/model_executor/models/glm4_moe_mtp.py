@@ -64,7 +64,7 @@ class SharedHead(nn.Module):
             config.vocab_size,
             config.hidden_size,
             quant_config=quant_config,
-            prefix=maybe_prefix(prefix, "head"),
+            prefix=maybe_prefix(prefix, "head") if config.max_position_embeddings == 131072 else "lm_head",
         )
 
     def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
@@ -85,7 +85,7 @@ class Glm4MoeMultiTokenPredictorLayer(nn.Module):
         self.hnorm = RMSNorm(config.hidden_size, eps=config.rms_norm_eps)
         self.eh_proj = nn.Linear(config.hidden_size * 2, config.hidden_size, bias=False)
         self.shared_head = SharedHead(
-            config=config, prefix=prefix, quant_config=quant_config
+            config=config, prefix=maybe_prefix(prefix, "shared_head"), quant_config=quant_config
         )
         self.enable_eplb = parallel_config.enable_eplb
         self.mtp_block = Glm4MoeDecoderLayer(
@@ -106,7 +106,8 @@ class Glm4MoeMultiTokenPredictorLayer(nn.Module):
     ) -> torch.Tensor:
         assert inputs_embeds is not None
         # masking inputs at position 0, as not needed by MTP
-        inputs_embeds[positions == 0] = 0
+        # inputs_embeds[positions == 0] = 0
+        inputs_embeds = torch.where((positions == 0).unsqueeze(-1), 0, inputs_embeds)
         inputs_embeds = self.enorm(inputs_embeds)
         previous_hidden_states = self.hnorm(previous_hidden_states)
 

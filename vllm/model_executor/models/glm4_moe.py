@@ -538,7 +538,10 @@ class Glm4MoeModel(nn.Module):
                 if is_pp_missing_parameter(name, self):
                     continue
 
-                param = params_dict[name]
+                try:
+                    param = params_dict[name]
+                except KeyError:
+                    break
                 weight_loader = param.weight_loader
                 weight_loader(param, loaded_weight, shard_id)
                 break
@@ -560,7 +563,10 @@ class Glm4MoeModel(nn.Module):
                     if is_pp_missing_parameter(name_mapped, self):
                         continue
 
-                    param = params_dict[name_mapped]
+                    try:
+                        param = params_dict[name_mapped]
+                    except KeyError:
+                        continue
                     # We should ask the weight loader to return success or not
                     # here since otherwise we may skip experts with other
                     # available replicas.
@@ -597,7 +603,10 @@ class Glm4MoeModel(nn.Module):
                     if is_pp_missing_parameter(name, self):
                         continue
 
-                    param = params_dict[name]
+                    try:
+                        param = params_dict[name]
+                    except KeyError:
+                        continue
                     weight_loader = getattr(
                         param, "weight_loader", default_weight_loader
                     )
