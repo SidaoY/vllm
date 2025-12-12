@@ -30,6 +30,7 @@ from itertools import islice
 import torch
 from torch import nn
 from transformers.models.glm4_moe import Glm4MoeConfig
+from typing import Optional
 
 import torch_npu
 import torch_npu._inductor

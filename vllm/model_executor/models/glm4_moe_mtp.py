@@ -30,6 +30,7 @@ import torch.nn as nn
 from transformers import PretrainedConfig
 
 from vllm.config import CacheConfig, ParallelConfig, VllmConfig
+from vllm.compilation.decorators import support_torch_compile
 from vllm.model_executor.layers.fused_moe import FusedMoE
 from vllm.model_executor.layers.layernorm import RMSNorm
 from vllm.model_executor.layers.logits_processor import LogitsProcessor
@@ -185,6 +186,7 @@ class Glm4MoeMultiTokenPredictor(nn.Module):
         return logits
 
 
+@support_torch_compile
 class Glm4MoeMTP(nn.Module, SupportsPP, Glm4MixtureOfExperts):
     def __init__(self, *, vllm_config: VllmConfig, prefix: str = ""):
         super().__init__()
