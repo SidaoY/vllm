@@ -143,7 +143,6 @@ class Glm4MoE(nn.Module):
             config.hidden_size,
             config.n_routed_experts,
             bias=False,
-            dtype=torch.float32,
         )
         self.gate.e_score_correction_bias = nn.Parameter(
             torch.empty(config.n_routed_experts, dtype=torch.float32)
@@ -203,7 +202,7 @@ class Glm4MoE(nn.Module):
         hidden_states = hidden_states.view(-1, hidden_dim)
 
         # router_logits: (num_tokens, n_experts)
-        router_logits = self.gate(hidden_states.to(dtype=torch.float32))
+        router_logits = self.gate(hidden_states)
 
         fused_moe_out = self.experts(
             hidden_states=hidden_states, router_logits=router_logits
